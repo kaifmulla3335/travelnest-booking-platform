@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 40%, #f8fafc 100%);
+    min-height: 100vh;
+    color: #1e293b;
+  }
+}
+
+@layer components {
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(186, 230, 253, 0.5);
+  }
+  .glass-card {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(186, 230, 253, 0.5);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(14, 165, 233, 0.10);
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #0ea5e9, #0284c7);
+    color: white;
+    border-radius: 9999px;
+    padding: 10px 24px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35);
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid #7dd3fc;
+    color: #0284c7;
+    border-radius: 9999px;
+    padding: 10px 24px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .btn-outline:hover {
+    background: #e0f2fe;
+  }
+  .form-input {
+    width: 100%;
+    border: 1.5px solid #bae6fd;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    background: rgba(255,255,255,0.85);
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus {
+    border-color: #0ea5e9;
+    background: white;
+  }
+  .status-confirmed { background: #dcfce7; color: #16a34a; }
+  .status-pending   { background: #fef9c3; color: #ca8a04; }
+  .status-cancelled { background: #fee2e2; color: #dc2626; }
+}
+
+/* Hide scrollbar for filter chips */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
