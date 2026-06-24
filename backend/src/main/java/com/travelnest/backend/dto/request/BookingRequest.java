@@ -17,9 +17,6 @@ public class BookingRequest {
     private LocalDate travelDate;
 
     private String specialRequests;
-    private String firstName;
-    private String lastName;
-    private String phone;
 
     // ── Sent ONLY after Razorpay checkout succeeds (see PaymentPage.jsx) ──
     // Backend re-verifies these before trusting the payment — see BookingServiceImpl

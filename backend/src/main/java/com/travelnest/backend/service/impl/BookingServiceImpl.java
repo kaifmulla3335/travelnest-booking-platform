@@ -192,28 +192,6 @@ public class BookingServiceImpl implements BookingService {
         return toResponse(bookingRepository.save(booking));
     }
 
-    // ── Legacy bridge for the old generic status endpoint — translates old
-    //    (status=CONFIRMED / status=CANCELLED) calls into the correct new
-    //    state-machine action based on the booking's CURRENT status. ──
-    @Override
-    public BookingResponse legacyUpdateStatus(Long id, String targetStatus) {
-        Booking booking = getBookingOrThrow(id);
-        Booking.BookingStatus current = booking.getStatus();
-
-        if ("CONFIRMED".equals(targetStatus)) {
-            if (current == Booking.BookingStatus.PENDING) return approveBooking(id);
-            if (current == Booking.BookingStatus.CANCEL_REQUESTED) return decideCancelRequest(id, false);
-            throw new RuntimeException("Cannot confirm a booking in state " + current);
-        }
-        if ("CANCELLED".equals(targetStatus)) {
-            if (current == Booking.BookingStatus.CANCEL_REQUESTED) return decideCancelRequest(id, true);
-            if (current == Booking.BookingStatus.CONFIRMED) return forceCancelBooking(id, null);
-            if (current == Booking.BookingStatus.PENDING) return rejectBooking(id, null);
-            throw new RuntimeException("Cannot cancel a booking in state " + current);
-        }
-        throw new RuntimeException("Unsupported legacy status target: " + targetStatus);
-    }
-
     // ═══════════════════════════ REFUND HELPERS ═══════════════════════════
 
     // Same 7-day policy used on the frontend — kept here too since the actual
@@ -255,8 +233,9 @@ public class BookingServiceImpl implements BookingService {
             RazorpayClient client = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
             JSONObject refundRequest = new JSONObject();
             refundRequest.put("amount", (int) Math.round(amount * 100)); // paise
-            client.payments.refund(booking.getRazorpayPaymentId(), refundRequest);
+            com.razorpay.Refund razorpayRefund = client.payments.refund(booking.getRazorpayPaymentId(), refundRequest);
 
+            refund.setRazorpayRefundId(razorpayRefund.get("id"));
             refund.setStatus(Refund.RefundStatus.INITIATED);
             // Test mode settles instantly; in production this would flip to COMPLETED
             // via a Razorpay webhook instead of being assumed here.

@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { usePackageById } from '../../hooks/usePackages';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
-import { MapPin, Clock, Star, Users, CheckCircle, Calendar, AlertTriangle, Shield } from 'lucide-react';
+import { MapPin, Clock, Star, Users, CheckCircle, Calendar, AlertTriangle, Shield, User } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 
 const BookingPage = () => {
@@ -11,17 +11,7 @@ const BookingPage = () => {
   const { user }         = useAuthStore();
   const navigate         = useNavigate();
   const [travelers, setTravelers] = useState(1);
-  const stripPrefix = (p) => p?.replace(/^\+91/, '').replace(/\D/g, '').slice(0, 10) || '';
-
-  const [form, setForm]  = useState({
-    firstName: user?.name?.split(' ')[0] || '',
-    lastName:  user?.name?.split(' ').slice(1).join(' ') || '',
-    email:     user?.email || '',
-    phone:     stripPrefix(user?.phone),
-    special:   '',
-  });
-
-  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const [special, setSpecial]     = useState('');
 
   if (loading) return <LoadingSpinner />;
   if (!pkg) return null;
@@ -38,25 +28,19 @@ const BookingPage = () => {
 
   const imgSrc = pkg.imageUrl || pkg.image || null;
 
-  const onSubmit = async (e) => {
+  const onSubmit = (e) => {
     e.preventDefault();
 
-    if (form.phone.length !== 10) {
-      alert('Please enter a valid 10-digit phone number');
-      return;
-    }
-
+    // Booking is always tied to the logged-in account — name/email/phone come
+    // from the account itself (see User entity), not re-collected here.
     const bookingData = {
       packageId:       pkg.id,
       travelers,
       travelDate:      pkg.tourStartDate, // admin set tour date use karo
-      specialRequests: form.special,
-      firstName:       form.firstName,
-      lastName:        form.lastName,
-      phone:           `+91${form.phone}`,
+      specialRequests: special,
     };
 
-    sessionStorage.setItem('tn_booking', JSON.stringify({ pkg, form, travelers, total, base, tax }));
+    sessionStorage.setItem('tn_booking', JSON.stringify({ pkg, travelers, total, base, tax }));
     sessionStorage.setItem('tn_booking_payload', JSON.stringify(bookingData));
 
     navigate('/payment');
@@ -74,50 +58,19 @@ const BookingPage = () => {
 
           {/* ── Form ── */}
           <form onSubmit={onSubmit} className="lg:col-span-2 glass-card p-5 sm:p-8">
-            <h2 className="font-semibold text-slate-800 text-base sm:text-lg mb-5">Traveler Details</h2>
+            <h2 className="font-semibold text-slate-800 text-base sm:text-lg mb-5">Booking Details</h2>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">First Name *</label>
-                <input name="firstName" required placeholder="Aarav"
-                  value={form.firstName} onChange={onChange} className="form-input text-sm" />
+            {/* Account info — read-only. The booking is always tied to your account;
+                contact details for confirmation/support come from your profile. */}
+            <div className="mb-5 bg-sky-50 border border-sky-100 rounded-xl px-4 py-3 flex items-start gap-3">
+              <User size={15} className="text-sky-500 flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-semibold text-slate-700">{user?.name}</p>
+                <p className="text-slate-500 text-xs">{user?.email} · {user?.phone || 'No phone on file'}</p>
+                <p className="text-sky-600 text-xs mt-1">
+                  Booking under your account. Update these in <a href="/profile" className="underline font-medium">My Profile</a> if needed.
+                </p>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Last Name *</label>
-                <input name="lastName" required placeholder="Kumar"
-                  value={form.lastName} onChange={onChange} className="form-input text-sm" />
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Email *</label>
-              <input name="email" type="email" required placeholder="you@example.com"
-                value={form.email} onChange={onChange} className="form-input text-sm" />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Phone *</label>
-              <div className="flex">
-                <span className="flex items-center px-3 border border-r-0 border-slate-200 rounded-l-xl bg-slate-50 text-slate-500 text-sm font-medium select-none">
-                  +91
-                </span>
-                <input
-                  name="phone"
-                  type="tel"
-                  inputMode="numeric"
-                  required
-                  maxLength={10}
-                  placeholder="98765 43210"
-                  value={form.phone}
-                  onChange={(e) => {
-                    const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
-                    setForm(f => ({ ...f, phone: digits }));
-                  }}
-                  className="form-input text-sm rounded-l-none flex-1" />
-              </div>
-              {form.phone && form.phone.length !== 10 && (
-                <p className="text-xs text-red-500 mt-1">Phone number must be 10 digits</p>
-              )}
             </div>
 
             {/* Number of travelers */}
@@ -137,7 +90,7 @@ const BookingPage = () => {
               <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Special Requests</label>
               <textarea name="special" rows={3}
                 placeholder="Dietary needs, accessibility requirements..."
-                value={form.special} onChange={onChange}
+                value={special} onChange={e => setSpecial(e.target.value)}
                 className="form-input text-sm resize-none" />
             </div>
 
@@ -154,8 +107,7 @@ const BookingPage = () => {
             )}
 
             <button type="submit"
-              disabled={form.phone.length !== 10}
-              className="btn-primary w-full py-3 text-sm rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              className="btn-primary w-full py-3 text-sm rounded-xl flex items-center justify-center gap-2">
               <Shield size={14} /> Proceed to Payment →
             </button>
           </form>

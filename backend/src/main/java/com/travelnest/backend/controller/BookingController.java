@@ -85,17 +85,6 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.decideCancelRequest(id, approve));
     }
 
-    // ── DEPRECATED — legacy bridge for the old generic status endpoint.
-    //    Kept only so any old frontend code still works; new code should call
-    //    the explicit endpoints above instead. ──
-    @PutMapping("/api/admin/bookings/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<BookingResponse> legacyUpdateStatus(
-            @PathVariable Long id,
-            @RequestParam String status) {
-        return ResponseEntity.ok(bookingService.legacyUpdateStatus(id, status));
-    }
-
     // ── User: Download my Payment Receipt (always available, no QR) ──
     @GetMapping("/api/bookings/{id}/receipt")
     public ResponseEntity<byte[]> downloadMyReceipt(

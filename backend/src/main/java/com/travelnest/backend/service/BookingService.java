@@ -18,11 +18,6 @@ public interface BookingService {
     BookingResponse forceCancelBooking(Long id, String reason);      // CONFIRMED → CANCELLED_BY_ADMIN (+full refund)
     BookingResponse decideCancelRequest(Long id, boolean approve);   // CANCEL_REQUESTED → CANCELLED_BY_USER (+policy refund) or revert
 
-    // ── Legacy bridge — kept so old frontend code (status=CONFIRMED/CANCELLED) keeps
-    //     working until the admin UI is migrated to the explicit endpoints above.
-    //     Internally dispatches to the correct state-machine method based on current status.
-    BookingResponse legacyUpdateStatus(Long id, String targetStatus);
-
     // ── PDF documents ──
     byte[] generateReceiptPdf(Long bookingId, String userEmail);       // always available once paid
     byte[] generateReceiptPdfForAdmin(Long bookingId);

@@ -5,25 +5,31 @@ import {
   Calendar, Users, Clock, Download, Share2, Plane, Loader2
 } from 'lucide-react';
 import useSiteStore from '../../store/siteStore';
-import { downloadTicket } from '../../services/bookingService';
+import useAuthStore from '../../store/authStore';
+import { downloadReceipt } from '../../services/bookingService';
 
 const SuccessPage = () => {
   const navigate   = useNavigate();
   const { siteName } = useSiteStore();
+  const { user }      = useAuthStore();
   const saved      = useRef(false);
   const bookingRef = sessionStorage.getItem('tn_booking_ref') || 'TN0001';
   const bookingId  = sessionStorage.getItem('tn_booking_id');
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState('');
 
-  const handleDownloadTicket = async () => {
+  // A booking is always PENDING right at this point (admin hasn't reviewed it
+  // yet) — so we download the Payment Receipt here, NOT the E-Ticket. The
+  // E-Ticket (with QR) only becomes available after admin approval, from
+  // the Dashboard.
+  const handleDownloadReceipt = async () => {
     if (!bookingId) return;
     setDownloading(true);
     setDownloadError('');
     try {
-      await downloadTicket(bookingId, bookingRef);
+      await downloadReceipt(bookingId, bookingRef);
     } catch (err) {
-      setDownloadError('Could not download ticket. Please try again from My Bookings.');
+      setDownloadError('Could not download receipt. Please try again from My Bookings.');
     } finally {
       setDownloading(false);
     }
@@ -36,7 +42,6 @@ const SuccessPage = () => {
   })();
 
   const pkg  = raw?.pkg;
-  const form = raw?.form;
   const travelers = raw?.travelers || 1;
   const total     = raw?.total || 0;
   const tax       = raw?.tax   || 0;
@@ -154,12 +159,12 @@ const SuccessPage = () => {
               </div>
             </div>
 
-            {/* Passenger name */}
-            {form?.firstName && (
+            {/* Passenger name — from your account, same as the PDF receipt/ticket */}
+            {user?.name && (
               <div className="mb-4 pb-4 border-b border-dashed border-slate-200">
                 <p className="text-xs text-slate-400 uppercase font-semibold tracking-wide mb-0.5">Passenger</p>
-                <p className="font-semibold text-slate-800">{form.firstName} {form.lastName}</p>
-                <p className="text-xs text-slate-400">{form.email}</p>
+                <p className="font-semibold text-slate-800">{user.name}</p>
+                <p className="text-xs text-slate-400">{user.email}</p>
               </div>
             )}
 
@@ -198,7 +203,7 @@ const SuccessPage = () => {
           {/* Ticket footer */}
           <div className="px-5 py-4 bg-slate-50">
             <p className="text-xs text-slate-500 text-center mb-3">
-              📧 Confirmation will be sent to <span className="font-semibold">{form?.email || 'your email'}</span>
+              📧 Confirmation will be sent to <span className="font-semibold">{user?.email || 'your email'}</span>
             </p>
             <p className="text-xs text-slate-400 text-center">
               Cancellation: Free if cancelled 7+ days before tour start date.
@@ -211,16 +216,16 @@ const SuccessPage = () => {
           <p className="text-red-500 text-xs text-center mt-3">{downloadError}</p>
         )}
 
-        {/* Download Ticket button */}
+        {/* Download Receipt button */}
         <button
-          onClick={handleDownloadTicket}
+          onClick={handleDownloadReceipt}
           disabled={downloading || !bookingId}
           className="w-full mt-5 bg-slate-800 hover:bg-slate-900 text-white py-3 text-sm font-semibold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 transition-colors"
         >
           {downloading ? (
             <><Loader2 size={15} className="animate-spin" /> Generating PDF...</>
           ) : (
-            <><Download size={15} /> Download E-Ticket (PDF)</>
+            <><Download size={15} /> Download Payment Receipt (PDF)</>
           )}
         </button>
 
