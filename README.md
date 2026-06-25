@@ -243,4 +243,4 @@ UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';
 
 ## 📄 License
 
-MIT
+MIT © [Mohammadkaif Mulla](https://github.com/kaifmulla3335)
