@@ -209,10 +209,11 @@ const AdminPackages = () => {
   const uploadImage = async (file) => {
     const fd = new FormData();
     fd.append("file", file);
-
     const res = await fetch(`${API}/admin/upload-image`, {
       method: "POST",
-      headers: authHeader(),
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
       body: fd,
     });
 
