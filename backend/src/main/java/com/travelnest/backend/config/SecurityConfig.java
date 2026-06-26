@@ -54,7 +54,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/packages/**").permitAll()
                         .requestMatchers("/api/settings/public").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/uploads/**").permitAll()
 
                         // Protected APIs
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

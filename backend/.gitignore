@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Uploads — Cloudinary handles all file storage now, no local files to track
+uploads/
