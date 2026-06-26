@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
 import useSiteStore from './store/siteStore';
 import axiosInstance from './api/axios';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 const App = () => {
   const setSiteSettings = useSiteStore(s => s.setSiteSettings);
@@ -15,9 +16,11 @@ const App = () => {
   }, [setSiteSettings]);
 
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 

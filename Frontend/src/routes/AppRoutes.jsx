@@ -24,6 +24,7 @@ import AdminUsers     from '../pages/admin/AdminUsers';
 import AdminRevenue   from '../pages/admin/AdminRevenue';
 import AdminSettings  from '../pages/admin/AdminSettings';
 import VerifyPage     from '../pages/public/VerifyPage';
+import NotFoundPage   from '../pages/NotFoundPage';
 
 const AppRoutes = () => (
   <Routes>
@@ -43,6 +44,8 @@ const AppRoutes = () => (
       <Route path="/booking/:id"  element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
       <Route path="/payment"      element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
       <Route path="/success"      element={<ProtectedRoute><SuccessPage /></ProtectedRoute>} />
+      {/* Catch-all 404 */}
+      <Route path="*" element={<NotFoundPage />} />
     </Route>
 
     <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
