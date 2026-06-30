@@ -42,7 +42,7 @@ const VerifyPage = () => {
                 ? <CheckCircle size={44} className="mx-auto mb-2" />
                 : <XCircle size={44} className="mx-auto mb-2" />}
               <p className="font-display font-bold text-lg">{result.valid ? 'Valid Ticket' : 'Invalid Ticket'}</p>
-              <p className="text-xs opacity-90 mt-0.5">{result.message}</p>
+              {!result.valid && <p className="text-xs opacity-90 mt-0.5">{result.message}</p>}
             </div>
 
             {/* Details — only shown when the token actually matched a booking */}
