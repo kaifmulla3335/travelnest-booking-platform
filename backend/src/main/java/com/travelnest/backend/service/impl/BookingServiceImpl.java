@@ -1,5 +1,16 @@
 package com.travelnest.backend.service.impl;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.razorpay.RazorpayClient;
 import com.razorpay.Utils;
 import com.travelnest.backend.dto.request.BookingRequest;
@@ -16,17 +27,8 @@ import com.travelnest.backend.repository.SettingRepository;
 import com.travelnest.backend.repository.UserRepository;
 import com.travelnest.backend.service.BookingService;
 import com.travelnest.backend.service.TicketService;
-import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -242,6 +244,9 @@ public class BookingServiceImpl implements BookingService {
             refund.setCompletedAt(LocalDateTime.now());
             booking.setPaymentStatus(Booking.PaymentStatus.REFUNDED);
         } catch (Exception e) {
+            // Log the real reason — without this, a FAILED refund is undebuggable later.
+            System.err.println("Razorpay refund failed for booking " + booking.getId() + ": " + e.getMessage());
+            e.printStackTrace();
             refund.setStatus(Refund.RefundStatus.FAILED);
             // Booking still gets cancelled — admin can see the FAILED refund and retry manually.
         }
